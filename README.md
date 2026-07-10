@@ -1,14 +1,14 @@
 <div align="center">
 <img src="static/images/logo.png" width="360" height="auto" alt="媒体解析去水印 Logo">
 
-**基于 Python 的多平台媒体原生本地解析系统（Starter 极简版）**
+**基于 Python 的多平台短视频去水印 API（极简版）**
 
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/) [![Support](https://img.shields.io/badge/support-8+%20Platforms-brightgreen.svg)](#💾-支持的平台矩阵)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/) [![Support](https://img.shields.io/badge/support-4%20Platforms-brightgreen.svg)](#-支持的平台)
 
 <p align="center">
 <a href="#-核心解析逻辑">解析逻辑</a> •
-<a href="#-快速开始">部署指南</a> •
-<a href="#-联系作者">联系作者</a>
+<a href="#-部署指南">部署指南</a> •
+<a href="DEPLOY.md">完整部署文档</a>
 </p>
 
 媒体解析去水印是一款专为短视频创作者打造的**原生本地解析工具**。
