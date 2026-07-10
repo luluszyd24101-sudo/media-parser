@@ -17,13 +17,11 @@ class WebFetcher:
         try:
             current_url = url
             for _ in range(max_redirects):
-                # 发送请求，禁止重定向
                 resp = requests.get(current_url, headers=WebFetcher.headers, allow_redirects=False, timeout=5)
                 resp.raise_for_status()
                 redirect_url = resp.headers.get("location")
                 if redirect_url:
                     redirect_url = urljoin(current_url, redirect_url)
-                    # 如果重定向到了登录页、404拦截页、验证码校验页或错误页，不要更新 url，直接中断以保留原始有效 URL
                     if any(path in redirect_url for path in ["/login", "/404", "/captcha", "/verify", "/error"]):
                         break
                     current_url = redirect_url
@@ -31,7 +29,6 @@ class WebFetcher:
                         break
                 else:
                     break
-
             else:
                 return None
 
@@ -79,19 +76,9 @@ class UrlParser:
         address = f"{parsed_url.scheme}://{domain}{parsed_url.path}"
         if address.endswith('/'):
             address = address[:-1]
-        if platform == '好看视频':
+        if platform == "小红书":
             query_params = parse_qs(parsed_url.query)
-            vid = query_params.get('vid', [None])[0]  # 使用 get 方法避免 KeyError
-            if vid:
-                address = f"{address}?vid={vid}"
-        elif platform == "微视":
-            query_params = parse_qs(parsed_url.query)
-            vid = query_params.get('id', [None])[0]  # 使用 get 方法避免 KeyError
-            if vid:
-                address = f"{address}?id={vid}"
-        elif platform == "小红书":
-            query_params = parse_qs(parsed_url.query)
-            xsec_token = query_params.get('xsec_token', [None])[0]  # 使用 get 方法避免 KeyError
+            xsec_token = query_params.get('xsec_token', [None])[0]
             if xsec_token:
                 address = f"{address}?xsec_token={xsec_token}"
         elif platform == "快手":
@@ -101,21 +88,6 @@ class UrlParser:
             modal_id = query_params.get('modal_id', [None])[0]
             if modal_id:
                 address = f"{address}?modal_id={modal_id}"
-        elif platform == "YouTube":
-            query_params = parse_qs(parsed_url.query)
-            v = query_params.get('v', [None])[0]
-            if v:
-                address = f"{address}?v={v}"
-        elif platform == "全民K歌":
-            query_params = parse_qs(parsed_url.query)
-            s = query_params.get('s', [None])[0]
-            if s:
-                address = f"{address}?s={s}"
-        elif platform == "最右":
-            query_params = parse_qs(parsed_url.query)
-            pid = query_params.get('pid', [None])[0]
-            if pid:
-                address = f"{address}?pid={pid}"
         return address
 
     @staticmethod
@@ -123,26 +95,9 @@ class UrlParser:
         try:
             parsed_url = urlparse(url)
             query_params = parse_qs(parsed_url.query)
-            # 尝试从查询参数中获取视频ID
-            params_vid = query_params.get('vid', [None])[0]
-            if params_vid:
-                return params_vid
-            params_id = query_params.get('id', [None])[0]
-            if params_id:
-                return params_id
             params_modal_id = query_params.get('modal_id', [None])[0]
             if params_modal_id:
                 return params_modal_id
-            params_v = query_params.get('v', [None])[0]
-            if params_v:
-                return params_v
-            params_s = query_params.get('s', [None])[0]
-            if params_s:
-                return params_s
-            params_pid = query_params.get('pid', [None])[0]
-            if params_pid:
-                return params_pid
-            # 尝试从URL路径中获取视频ID
             path_segments = parsed_url.path.strip('/').split('/')
             if path_segments:
                 video_id = path_segments[-1]
@@ -157,46 +112,18 @@ class UrlParser:
 
     @staticmethod
     def generate_video_url(platform, video_id):
-        # 定义映射表
         url_map = {
-            '皮皮搞笑': 'https://h5.pipigx.com/pp/post/',
-            '好看视频': 'https://haokan.hao123.com/v?vid=',
             '哔哩哔哩': 'https://www.bilibili.com/video/',
             '抖音': 'https://www.iesdouyin.com/share/video/',
             '快手': 'https://www.kuaishou.com/short-video/',
-            '梨视频': 'https://www.pearvideo.com/',
-            'AcFun': 'https://www.acfun.cn/v/',
-            'TikTok': 'https://www.tiktok.com/@/video/',
-            '微博': 'https://m.weibo.cn/status/',
-            '西瓜视频': 'https://www.ixigua.com/',
-            'YouTube': 'https://www.youtube.com/watch?v=',
-            '知乎': 'https://www.zhihu.com/question/',
-            '逗拍': 'https://v2.doupai.cc/topic/',
-            '虎牙': 'https://v.huya.com/play/',
-            '绿洲': 'https://oasis.weibo.cn/v1/h5/share?sid=',
-            '美拍': 'https://www.meipai.com/media/',
-            '皮皮虾': 'https://h5.pipix.com/item/',
-            '全民小视频': 'https://quanmin.baidu.com/v/',
-            '全民K歌': 'https://kg.qq.com/node/play?s=',
-            '六间房': 'https://v.6.cn/video/',
-            '新片场': 'https://www.xinpianchang.com/a',
-            '最右': 'https://izuiyou.com/post/'
         }
-        # 检查platform是否在映射表中
         if platform not in url_map:
             return "Error: 不支持的平台"
-        # 拼接URL
         base_url = url_map[platform]
         full_url = base_url + video_id
         return full_url
 
 
 if __name__ == '__main__':
-    # share_url = UrlParser.get_url('0.74 复制打开抖音，看看【珊珊的甜甜圈之小圈的作品】虽然桌拍我已经没问题了，这个月也可以保级了，我也不... https://v.douyin.com/ir94AJyD/ l@c.At qEh:/ 01/19 ')
-    # redirect_url = WebFetcher.fetch_redirect_url(share_url)
-    # if redirect_url:
-    #     print(f'重定向后的链接：{redirect_url}')
-    # else:
-    #     print('未能获取重定向后的链接')
-    video_id1 = UrlParser.get_video_id('https://haokan.hao123.com/v?vid=1770898033348505648')
+    video_id1 = UrlParser.get_video_id('https://www.douyin.com/video/7307457174287205926')
     print(video_id1)
